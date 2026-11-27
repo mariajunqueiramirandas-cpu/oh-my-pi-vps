@@ -1,0 +1,13 @@
+# omp defaults baked into the reverse-engineering image (loaded through
+# PI_CONFIG_FILES, so the hub's settings page and environment settings win).
+
+# omp's own read-binary tool uses the image's Ghidra (GHIDRA_INSTALL_DIR) and
+# this prebuilt PyGhidra environment instead of provisioning one per session.
+ghidra:
+  python: /opt/pyghidra/bin/python
+
+# Wait for MCP servers before the session starts (REA's handshake takes a second
+# or two). Otherwise a shell created before REA connects never gets its
+# `mcp__rea_*` commands.
+mcp:
+  startupTimeoutMs: 0

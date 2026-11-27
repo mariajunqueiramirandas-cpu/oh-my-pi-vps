@@ -1,0 +1,74 @@
+# omp-hub configuration. Copy to ~/.omp-hub/hub.yaml (or pass --config).
+# This file is the trust root: host mounts, extra runtime flags, forwardable
+# secrets and joinable networks can only be granted here, never from the API.
+
+listen:
+  host: 127.0.0.1 # keep the hub on localhost; Caddy serves your domain over HTTPS
+  port: 7480
+  trustProxy: true # read client addresses from Caddy's X-Forwarded-For
+
+# The address you open on your phone; used for pairing links and notification links.
+publicUrl: https://hub.example.com
+
+runtime:
+  kind: docker # docker | podman | host (host = UNSANDBOXED, dev only)
+  # ociRuntime: runsc # gVisor: a user-space kernel between the agent and the host
+  user: host # run sandboxes as the hub's uid so checkout files stay yours
+  allowedNetworks: [bridge, none] # networks phone-defined environments may join
+
+agent:
+  command: [omp] # argv that starts omp inside the image
+  approvalMode: yolo # the sandbox is the safety boundary; outward actions go through the hub
+  # seedDir: ~/.omp-hub/agent-seed # copied into each session's ~/.omp/agent (models.yml, config.yml)
+
+git:
+  author: { name: omp-hub, email: omp-hub@users.noreply.github.com }
+
+# Opening pull requests from the phone. The token stays in the hub process.
+github:
+  tokenEnv: GITHUB_TOKEN
+
+# Subscription logins (Settings → Subscriptions) reach agents through the hub at
+# publicUrl. Set sandboxUrl only if containers cannot reach publicUrl.
+# subscriptions:
+#   sandboxUrl: http://172.17.0.1:7480
+
+# Model keys are added in the app (Settings → API keys). This list is only for
+# variables of the hub's own process that hub.yaml environments may forward.
+secrets:
+  allow: []
+
+sessions:
+  idleStopMinutes: 30 # stop idle agents; the next prompt resumes them (--continue)
+  maxRunning: 3 # concurrent agents; the longest-idle one is stopped to make room
+
+notify:
+  ntfy:
+    server: https://ntfy.sh # or your own ntfy server
+    topic: omp-hub-change-me-to-something-unguessable
+    # tokenEnv: NTFY_TOKEN
+
+environments:
+  # Image built from this repository's Dockerfile: `bun run pi:image`.
+  default:
+    image: oh-my-pi/pi:dev
+    resources: { memory: 4g, cpus: 2, pids: 1024 }
+
+  # A toolchain image built on demand from an inline Dockerfile.
+  rust:
+    dockerfile: |
+      FROM oh-my-pi/pi:dev
+      RUN rustup toolchain install stable --profile minimal
+    mounts:
+      - { volume: omp-hub-cargo, target: /home/agent/.cargo/registry }
+    setup: ["cargo fetch"]
+    settings: # omp config.yml overlay for agents in this environment
+      tools: { approvalMode: yolo }
+    resources: { memory: 8g, cpus: 4 }
+
+  # Reverse engineering: REA's MCP server and skill, Ghidra, JADX, Binwalk, Rizin, …
+  # Build it once: `bun run --cwd packages/hub image:reverse-engineering`.
+  reverse-engineering:
+    image: omp-hub/reverse-engineering:dev
+    resources: { memory: 8g, cpus: 4, pids: 4096 }
+
