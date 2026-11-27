@@ -722,6 +722,34 @@ export class RpcClient {
 	}
 
 	/**
+	 * Subscribe to extension UI requests: dialogs the host must answer with
+	 * {@link respondExtensionUI} (`select`, `confirm`, `input`, `editor`, `ask`,
+	 * `form`) and presentation updates that need no answer.
+	 */
+	onExtensionUIRequest(listener: (request: RpcExtensionUIRequest) => void): () => void {
+		this.#extensionUiListeners.add(listener);
+		return () => {
+			this.#extensionUiListeners.delete(listener);
+		};
+	}
+
+	/**
+	 * Answer an extension UI dialog by its request id. Returns false when the
+	 * agent is no longer running, so a late answer is dropped instead of thrown.
+	 */
+	respondExtensionUI(response: RpcExtensionUIResponse): boolean {
+		if (!this.#process) return false;
+		this.#writeFrame(response);
+		return true;
+	}
+
+	/** Opt in to structured `ask` dialogs instead of the HTML `form` fallback. */
+	async setAskDialog(enabled: boolean): Promise<boolean> {
+		const response = await this.#send({ type: "set_ask_dialog", enabled });
+		return this.#getData<{ enabled: boolean }>(response).enabled;
+	}
+
+	/**
 	 * Get collected stderr output (useful for debugging).
 	 */
 	getStderr(): string {
@@ -1165,11 +1193,14 @@ export class RpcClient {
 	 * Execute a bash command, optionally keeping its output out of model context.
 	 * Excluded commands require an explicitly advertised runtime capability.
 	 */
-	async bash(command: string, options?: { excludeFromContext?: boolean }): Promise<BashResult> {
+	async bash(command: string, options?: { excludeFromContext?: boolean; timeoutMs?: number }): Promise<BashResult> {
 		if (options?.excludeFromContext === true && !this.#supportsBashExcludeFromContext) {
 			throw new Error("RPC runtime does not support bash context exclusion");
 		}
-		const response = await this.#send({ type: "bash", command, excludeFromContext: options?.excludeFromContext });
+		const response = await this.#send(
+			{ type: "bash", command, excludeFromContext: options?.excludeFromContext },
+			options?.timeoutMs,
+		);
 		return this.#getData(response);
 	}
 
