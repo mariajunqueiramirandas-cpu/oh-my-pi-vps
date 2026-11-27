@@ -17,6 +17,7 @@ This repo contains multiple packages, but **`packages/coding-agent/`** is the pr
 |`packages/tui`|UI library: reactive JSX nodes, terminal and native (TSP) renderers, terminal driver, text, theme|
 |`packages/natives`|Bindings for native text/image/grep operations|
 |`packages/stats`|Local observability dashboard (`omp stats`)|
+|`packages/hub`|Self-hosted control plane running sandboxed sessions for remote/phone use (`omp-hub`)|
 |`packages/omptype`|ArkType-compatible schema validation with a lazy JIT runtime|
 |`packages/utils`|Shared utilities (logger, streams, temp files)|
 |`crates/natives`|Rust crate for performance-critical text/grep ops|

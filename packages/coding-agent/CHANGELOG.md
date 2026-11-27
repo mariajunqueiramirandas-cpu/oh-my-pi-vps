@@ -9,6 +9,7 @@
 
 ### Added
 
+- Added `RpcClient.onExtensionUIRequest`, `respondExtensionUI`, and `setAskDialog` so embedding hosts can answer the agent's dialogs and questions.
 - Added `tui.showLinkUrl` to hide the URL displayed after named Markdown links when their labels are terminal hyperlinks.
 - Added model status-line options to show the provider, choose between model name, ID, or full identifier, and limit the displayed label length.
 - Added xAI speech-to-text support for dictation, including models such as `xai-oauth/grok-voice-transcribe-2.0`.

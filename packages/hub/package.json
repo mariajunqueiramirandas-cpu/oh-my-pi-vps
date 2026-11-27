@@ -1,0 +1,76 @@
+{
+  "type": "module",
+  "name": "@oh-my-pi/omp-hub",
+  "version": "19.2.1",
+  "private": true,
+  "description": "Self-hosted control plane that runs sandboxed omp coding sessions on a server and exposes them to a phone",
+  "homepage": "https://omp.sh",
+  "author": { "name": "Stencil Labs, Inc.", "url": "https://stencil.so" },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/can1357/oh-my-pi.git",
+    "directory": "packages/hub"
+  },
+  "keywords": [
+    "agent",
+    "sandbox",
+    "remote",
+    "hono"
+  ],
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "bin": {
+    "omp-hub": "./src/cli.ts"
+  },
+  "scripts": {
+    "dev": "bun run src/cli.ts serve",
+		"image:reverse-engineering": "docker build -t \"${RE_IMAGE:-omp-hub/reverse-engineering:dev}\" environments/reverse-engineering",
+    "check": "oxlint . && oxfmt --check --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx}' '{test,bench,examples,scripts}/**/*.ts' '*.ts' && bun run check:types",
+    "check:types": "bun check --no-script -p tsconfig.json && bun check --no-script -p tsconfig.web.json",
+    "lint": "oxlint .",
+    "fix": "oxlint --fix --fix-suggestions . && bun run fmt",
+    "fmt": "oxfmt --no-error-on-unmatched-pattern 'src/**/*.{ts,tsx}' '{test,bench,examples,scripts}/**/*.ts' '*.ts'"
+  },
+  "dependencies": {
+    "@hono/standard-validator": "catalog:",
+    "@oh-my-pi/omptype": "catalog:",
+    "@oh-my-pi/pi-agent-core": "catalog:",
+    "@oh-my-pi/pi-ai": "catalog:",
+    "@oh-my-pi/pi-catalog": "catalog:",
+    "@oh-my-pi/pi-coding-agent": "catalog:",
+    "@oh-my-pi/pi-utils": "catalog:",
+    "hono": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@standard-schema/spec": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:"
+  },
+  "engines": {
+    "bun": ">=1.4.4"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "import": "./src/client.ts"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "import": "./src/*.ts"
+    }
+  }
+}

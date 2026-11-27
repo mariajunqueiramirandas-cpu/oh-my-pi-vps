@@ -1,0 +1,11 @@
+{
+	"name": "omp hub",
+	"short_name": "omp hub",
+	"description": "Run and supervise coding agents on your server.",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#eef1f4",
+	"theme_color": "#eef1f4",
+	"icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
